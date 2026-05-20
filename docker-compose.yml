@@ -1,0 +1,77 @@
+services:
+  app:
+    build:
+      context: .
+      args:
+        PUBLIC_URL: ${PUBLIC_URL:-http://localhost:3000}
+        GINGKO_CLIENT_REF: ${GINGKO_CLIENT_REF:-master}
+        GINGKO_SERVER_REF: ${GINGKO_SERVER_REF:-master}
+    image: gingko-selfhost:local
+    container_name: gingko
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      PORT: 3000
+      COUCHDB_HOST: couchdb
+      COUCHDB_PORT: 5984
+      REDIS_URL: redis://redis:6379
+    ports:
+      - "${GINGKO_PORT:-3000}:3000"
+    volumes:
+      - gingko-data:/app/data
+    depends_on:
+      redis:
+        condition: service_healthy
+      couchdb-init:
+        condition: service_completed_successfully
+    healthcheck:
+      test: ["CMD-SHELL", "node -e \"fetch('http://127.0.0.1:3000/').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))\""]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+
+  redis:
+    image: redis:7-alpine
+    container_name: gingko-redis
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  couchdb:
+    image: couchdb:3.4
+    container_name: gingko-couchdb
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      COUCHDB_USER: ${COUCHDB_USER:-admin}
+      COUCHDB_PASSWORD: ${COUCHDB_PASSWORD:-admin}
+      COUCHDB_SECRET: ${COUCHDB_SECRET:-change-me}
+      NODENAME: 127.0.0.1
+    volumes:
+      - couchdb-data:/opt/couchdb/data
+      - ./couchdb/local.d/proxy-auth.ini:/opt/couchdb/etc/local.d/proxy-auth.ini
+
+  couchdb-init:
+    image: curlimages/curl:8.8.0
+    container_name: gingko-couchdb-init
+    restart: "no"
+    env_file: .env
+    depends_on:
+      - couchdb
+    command: >
+      sh -ec '
+        until curl -fsS "http://$${COUCHDB_USER}:$${COUCHDB_PASSWORD}@couchdb:5984/_up" >/dev/null; do
+          sleep 2;
+        done;
+        for db in _users _replicator _global_changes; do
+          curl -fsS -X PUT "http://$${COUCHDB_USER}:$${COUCHDB_PASSWORD}@couchdb:5984/$${db}" >/dev/null || true;
+        done;
+      '
+
+volumes:
+  gingko-data:
+  couchdb-data:
