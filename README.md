@@ -24,7 +24,7 @@ expire (the upstream SaaS trial is bypassed).
 ## Quick start
 
 ```bash
-git clone <this-repo> ~/server/gingko
+git clone https://github.com/dredshep/gingko-selfhost-docker ~/server/gingko
 cd ~/server/gingko
 cp .env.example .env
 nano .env                   # set passwords, port, PUBLIC_URL
