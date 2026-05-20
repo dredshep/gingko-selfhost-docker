@@ -8,7 +8,7 @@ Docker image, with Redis and CouchDB as companion services.
 >
 > This repository builds upstream Gingko from source and applies small patches during the Docker build.
 Because it tracks upstream master by default, future upstream changes may break the build.
-For reproducible installs, pin GINGKO_CLIENT_REF and GINGKO_SERVER_REF to known-working commits.
+For reproducible installs, pin GINGKO_CLIENT_REF and GINGKO_SERVER_REF to known-working commits (tested with 5db9854f9405e3e39aec6020ad1cd0b68082aa84).
 
 For self-hosted use, new local accounts are marked as `customer:selfhost` instead of temporary SaaS trial users.
 
