@@ -4,8 +4,9 @@ Builds the upstream [gingko/client](https://github.com/gingko/client) and
 [gingko/server](https://github.com/gingko/server) repositories into a single
 Docker image, with Redis and CouchDB as companion services.
 
-Status: experimental / tested on my own mini PC.
-This repository builds upstream Gingko from source and applies small patches during the Docker build.
+> Status: experimental / tested on my own mini PC.
+>
+> This repository builds upstream Gingko from source and applies small patches during the Docker build.
 Because it tracks upstream master by default, future upstream changes may break the build.
 For reproducible installs, pin GINGKO_CLIENT_REF and GINGKO_SERVER_REF to known-working commits.
 
